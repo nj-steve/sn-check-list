@@ -1,0 +1,51 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- SN Check app logo: scan viewfinder + SN text row above a barcode + verified badge -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B9BFF"/>
+      <stop offset="1" stop-color="#0A5BD6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="0" y="0" width="1024" height="1024" rx="232" fill="url(#bg)"/>
+
+  <!-- Scan viewfinder (four rounded brackets) -->
+  <g stroke="#FFFFFF" stroke-width="46" stroke-linecap="round" fill="none">
+    <path d="M 352 330 L 282 330 Q 232 330 232 380 L 232 450"/>
+    <path d="M 672 330 L 742 330 Q 792 330 792 380 L 792 450"/>
+    <path d="M 232 584 L 232 654 Q 232 704 282 704 L 352 704"/>
+    <path d="M 792 584 L 792 654 Q 792 704 742 704 L 672 704"/>
+  </g>
+
+  <!-- SN text row (abstract glyphs — the line above the barcode that the app OCRs) -->
+  <g fill="#FFFFFF" opacity="0.95">
+    <rect x="300" y="386" width="54" height="34" rx="8"/>
+    <rect x="371" y="386" width="24" height="34" rx="8"/>
+    <rect x="412" y="386" width="12" height="34" rx="6"/>
+    <rect x="441" y="386" width="44" height="34" rx="8"/>
+    <rect x="502" y="386" width="56" height="34" rx="8"/>
+    <rect x="575" y="386" width="36" height="34" rx="8"/>
+    <rect x="628" y="386" width="48" height="34" rx="8"/>
+    <rect x="693" y="386" width="42" height="34" rx="8"/>
+  </g>
+
+  <!-- Barcode (Code128-style black-and-white bars) -->
+  <g fill="#FFFFFF">
+    <rect x="282" y="470" width="20" height="178" rx="10"/>
+    <rect x="318" y="470" width="44" height="178" rx="12"/>
+    <rect x="376" y="470" width="20" height="178" rx="10"/>
+    <rect x="412" y="470" width="76" height="178" rx="14"/>
+    <rect x="500" y="470" width="20" height="178" rx="10"/>
+    <rect x="536" y="470" width="52" height="178" rx="12"/>
+    <rect x="600" y="470" width="20" height="178" rx="10"/>
+    <rect x="636" y="470" width="44" height="178" rx="12"/>
+    <rect x="692" y="470" width="20" height="178" rx="10"/>
+    <rect x="722" y="470" width="20" height="178" rx="10"/>
+  </g>
+
+  <!-- Verified badge (green + white outline + white check) -->
+  <circle cx="716" cy="712" r="150" fill="#34C759" stroke="#FFFFFF" stroke-width="16"/>
+  <path d="M 652 716 L 698 762 L 784 668" stroke="#FFFFFF" stroke-width="50"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

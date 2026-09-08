@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a84ff">
+<title>Image OCR - SN</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f5f7; color: #1c1c1e;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .container { padding: 16px; }
+  .short-banner {
+    background: #fff3cd; border-radius: 10px; padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+  .short-banner .ic { font-size: 24px; }
+  .short-banner .t1 { font-size: 14px; font-weight: 600; color: #856404; }
+  .short-banner .t2 { font-size: 12px; color: #856404; margin-top: 2px; word-break: break-all; }
+
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .btn {
+    display: block; width: 100%; background: #0a84ff; color: #fff;
+    font-size: 17px; font-weight: 600; border: 0; border-radius: 12px;
+    padding: 16px 0; margin: 12px 0; cursor: pointer;
+  }
+  .btn:active { opacity: 0.7; }
+  .btn:disabled { background: #8e8e93; }
+  .btn.gray { background: #2c2c2e; }
+  .btn.green { background: #34c759; }
+  .btn.red { background: #ff3b30; }
+
+  .preview { text-align: center; }
+  .preview img { max-width: 100%; max-height: 50vh; border-radius: 8px; }
+  .actions { display: flex; gap: 8px; margin-top: 12px; }
+  .actions .btn { margin: 0; }
+
+  .cand { background: #fff; border: 2px solid #e5e5ea; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; }
+  .cand.selected { border-color: #0a84ff; background: #f0f8ff; }
+  .cand .sn { font-size: 16px; font-weight: 600; font-family: monospace; word-break: break-all; }
+  .cand .meta { font-size: 12px; color: #8e8e93; margin-top: 4px; }
+
+  .sn-edit-box { margin-top: 12px; }
+  .sn-edit-label { font-size: 12px; color: #8e8e93; margin-bottom: 6px; }
+  .sn-edit { width: 100%; background: #fff; border: 2px solid #0a84ff; border-radius: 10px; padding: 12px 14px; font-size: 16px; font-weight: 600; font-family: monospace; letter-spacing: 1px; box-sizing: border-box; outline: none; }
+  .sn-edit-hint { font-size: 11px; color: #8e8e93; margin-top: 4px; }
+
+  .progress-box { background: rgba(0,0,0,.7); color: #fff; padding: 16px 24px; border-radius: 10px; font-size: 14px; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: none; align-items: center; justify-content: center; z-index: 99; }
+  .overlay.show { display: flex; }
+  .progress-bar { height: 6px; background: rgba(255,255,255,.2); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; background: #34c759; width: 0%; transition: width .2s; }
+
+  .log { font-family: monospace; font-size: 11px; color: #8e8e93; max-height: 120px; overflow: auto; background: #1c1c1e; color: #0f0; padding: 6px; border-radius: 4px; margin-top: 8px; }
+
+  .empty-state { text-align: center; padding: 40px 0; color: #8e8e93; }
+  .empty-state .ic { font-size: 60px; }
+
+  /* Hide the file inputs; trigger them via label */
+  input[type=file] { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Short-scan notice -->
+  <div class="short-banner" id="shortBanner" style="display:none">
+    <span class="ic">⚠️</span>
+    <div>
+      <div class="t1">Scanned content is too short</div>
+      <div class="t2" id="shortText">-</div>
+    </div>
+  </div>
+
+  <!-- Guidance -->
+  <div class="card" id="guide">
+    <div style="font-size:14px; font-weight:600; margin-bottom:6px">📸 Photograph the Miner Label</div>
+    <div style="font-size:13px; color:#6c6c70; line-height:1.7">
+      • Make sure the SN text is clearly visible in the frame<br>
+      • Good lighting; avoid reflections<br>
+      • Try to photograph only the label itself
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div id="actionBox">
+    <button class="btn" id="cameraBtn">📷 Take Photo</button>
+    <button class="btn gray" id="albumBtn">🖼 Choose from Album</button>
+  </div>
+
+  <!-- Selected image -->
+  <div class="card preview" id="previewBox" style="display:none">
+    <img id="previewImg">
+    <div class="actions">
+      <button class="btn gray" id="reselectBtn" style="flex:1">Re-choose</button>
+      <button class="btn" id="recognizeBtn" style="flex:2">Start Recognition</button>
+    </div>
+  </div>
+
+  <!-- Candidates -->
+  <div class="card" id="candBox" style="display:none">
+    <div style="font-size:14px; font-weight:600; margin-bottom:10px">🎯 Recognition Candidates (tap to select; editable below)</div>
+    <div id="candList"></div>
+    <!-- ★ Editable SN input: tapping a candidate fills it in; edit manually then verify -->
+    <div class="sn-edit-box">
+      <div class="sn-edit-label">SN (editable before verification) or last 7 characters</div>
+      <input id="snEdit" class="sn-edit" placeholder="Recognized result; edit here"
+             autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <div class="sn-edit-hint" id="snHint">0 chars</div>
+    </div>
+    <button class="btn green" id="confirmBtn" disabled style="margin-top:12px">Confirm & Verify</button>
+  </div>
+
+  <!-- Raw text -->
+  <div class="card" id="rawBox" style="display:none">
+    <div style="font-size:13px; color:#8e8e93">Raw recognition: <span id="rawText" style="font-family:monospace">-</span></div>
+  </div>
+
+  <!-- Debug log (visible during development; long-press the title 3s to show) -->
+  <div class="card" id="logBox" style="display:none">
+    <div style="font-size:12px; color:#8e8e93">Runtime log</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="overlay" id="overlay">
+  <div class="progress-box">
+    <div id="overlayText">Loading...</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+</div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="fileCamera" accept="image/*" capture="environment">
+<input type="file" id="fileAlbum" accept="image/*">
+
+<!-- ★ uni-app WebView JS-SDK: provides window.uni.webView.navigateTo / postMessage
+     Without it, the confirm button's navigation and message passing break
+     (only fallbackPostMessage runs, which the parent page never receives) -->
+<script src="./uni.webview.js"></script>
+<!-- Tesseract OCR (UMD exposes window.SnOcr) -->
+<script src="./local-ocr.umd.js"></script>
+<script>
+  // Debug info: show the current base URL
+  console.log('[ocr] window.location.href:', window.location.href)
+  console.log('[ocr] document.currentScript:', document.currentScript && document.currentScript.src)
+
+  const { recognizeSnFromImage, findRedBox, findTextRegion, preprocess, loadTesseract } = window.SnOcr
+
+// ============== State ==============
+let imagePath = ''
+let candidates = []
+let selectedIndex = -1
+let shortText = ''
+
+// ★ Minimum chars for the SN input — the hint, button state and confirm check all share this one rule
+const SN_MIN_CHARS = 7
+// ★ Full-SN threshold — >= this: direct check on the result page; below: sn7 fuzzy search page
+const SN_FULL_CHARS = 17
+
+// ============== Helpers ==============
+const $ = (id) => document.getElementById(id)
+const log = (m) => {
+  const el = $('log')
+  if (el) el.innerHTML = m + '<br>' + el.innerHTML
+  console.log('[ocr]', m)
+}
+const showOverlay = (text, percent) => {
+  $('overlayText').textContent = text
+  $('progressFill').style.width = (percent || 0) + '%'
+  $('overlay').classList.add('show')
+}
+const hideOverlay = () => $('overlay').classList.remove('show')
+
+// ============== uni-app WebView communication ==============
+function sendToUniApp(action, data) {
+  // ★ In 5+ App mode, prefer uni.webView.navigateTo so the webview itself navigates the outer route,
+  //   avoiding the unreliability of postMessage (the @message event doesn't fire automatically)
+  //   ocrResult (>= 17 chars) → result page; ocrShort (< 17) → sn7 fuzzy search page
+  if ((action === 'ocrResult' || action === 'ocrShort') && data && data.sn) {
+    if (window.uni && window.uni.webView && window.uni.webView.navigateTo) {
+      const url = action === 'ocrResult'
+        ? '/pages/result/result?sn=' + encodeURIComponent(data.sn) + '&type=OCR&input=' + encodeURIComponent(data.sn)
+        : '/pages/sn7/sn7?suffix=' + encodeURIComponent(data.sn)
+      log(`🔀 webView.navigateTo: ${url}`)
+      window.uni.webView.navigateTo({
+        url,
+        success: () => log('✅ Navigation OK'),
+        fail: (e) => {
+          log('❌ navigateTo failed: ' + JSON.stringify(e))
+          fallbackPostMessage(action, data)
+        }
+      })
+      return
+    }
+  }
+
+  // cancel uses navigateBack
+  if (action === 'cancel') {
+    if (window.uni && window.uni.webView && window.uni.webView.navigateBack) {
+      window.uni.webView.navigateBack({ delta: 1 })
+      return
+    }
+  }
+
+  // Other cases use postMessage
+  fallbackPostMessage(action, data)
+}
+
+function fallbackPostMessage(action, data) {
+  if (window.uni && window.uni.postMessage) {
+    window.uni.postMessage({ data: { action, ...data } })
+  }
+  if (window.parent !== window) {
+    window.parent.postMessage({ action, ...data }, '*')
+  }
+  log(`📤 postMessage: ${action} ${JSON.stringify(data).slice(0, 80)}`)
+}
+
+// ============== Receive uni-app params ==============
+function parseQuery() {
+  const search = window.location.search.slice(1)
+  const params = {}
+  search.split('&').forEach(kv => {
+    const [k, v] = kv.split('=')
+    if (k) params[k] = decodeURIComponent(v || '')
+  })
+  return params
+}
+
+const query = parseQuery()
+shortText = query.shortText || ''
+if (shortText) {
+  $('shortBanner').style.display = 'flex'
+  $('shortText').textContent = `"${shortText}" (${shortText.length} chars)`
+  log(`Short text: ${shortText}`)
+}
+
+// Notify uni-app that the H5 page is ready
+sendToUniApp('ready', {})
+
+// ============== Events ==============
+$('cameraBtn').onclick = () => $('fileCamera').click()
+$('albumBtn').onclick = () => $('fileAlbum').click()
+$('reselectBtn').onclick = () => resetToPick()
+$('recognizeBtn').onclick = () => runOcr()
+$('confirmBtn').onclick = () => {
+  // ★ The editable input is authoritative (candidates auto-fill it; manual edits allowed)
+  const sn = $('snEdit').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (!sn) { alert('Select a candidate or enter an SN first'); return }
+  if (sn.length < SN_MIN_CHARS) { alert(`Got ${sn.length} chars, need at least ${SN_MIN_CHARS} — please edit, then confirm`); return }
+  // ★ Routing: full SN (>= 17) → result page, verified centrally by the parent App (doCheck);
+  //   shorter input → sn7 fuzzy search page to pick and verify a matched candidate
+  if (sn.length >= SN_FULL_CHARS) {
+    sendToUniApp('ocrResult', { sn, source: 'ocr' })
+  } else {
+    sendToUniApp('ocrShort', { sn, source: 'ocr' })
+  }
+}
+
+// Input handling: auto-uppercase; keep alphanumerics only
+$('snEdit').addEventListener('input', () => {
+  const el = $('snEdit')
+  const v = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (v !== el.value) el.value = v
+  updateSnHint()
+})
+
+function updateSnHint() {
+  const len = $('snEdit').value.trim().length
+  const hint = (len > 0 && len < SN_MIN_CHARS)
+    ? ' · at least ' + SN_MIN_CHARS
+    : (len > 0 && len < SN_FULL_CHARS) ? ' · fuzzy lookup' : ' · direct check'
+  $('snHint').textContent = len + ' chars' + hint
+  $('confirmBtn').disabled = (len < SN_MIN_CHARS)  // same rule as the confirm-time check
+}
+
+$('fileCamera').onchange = (e) => onFile(e.target.files[0])
+$('fileAlbum').onchange = (e) => onFile(e.target.files[0])
+
+function resetToPick() {
+  imagePath = ''
+  candidates = []
+  selectedIndex = -1
+  $('snEdit').value = ''
+  updateSnHint()
+  $('actionBox').style.display = 'block'
+  $('previewBox').style.display = 'none'
+  $('candBox').style.display = 'none'
+  $('rawBox').style.display = 'none'
+  $('fileCamera').value = ''
+  $('fileAlbum').value = ''
+}
+
+function onFile(file) {
+  if (!file) return
+  imagePath = URL.createObjectURL(file)
+  $('previewImg').src = imagePath
+  $('actionBox').style.display = 'none'
+  $('previewBox').style.display = 'block'
+  $('candBox').style.display = 'none'
+  $('rawBox').style.display = 'none'
+  log(`📁 Image selected: ${file.name} (${(file.size/1024).toFixed(0)} KB)`)
+  // Start recognition automatically
+  setTimeout(runOcr, 200)
+}
+
+async function runOcr() {
+  if (!imagePath) return
+  showOverlay('Loading image...', 10)
+  candidates = []
+  selectedIndex = -1
+  $('candBox').style.display = 'none'
+  $('rawBox').style.display = 'none'
+
+  try {
+    const result = await recognizeSnFromImage(imagePath, {
+      onProgress: (m) => {
+        showOverlay(`${m.stage} (${m.percent}%)`, m.percent)
+      }
+    })
+    candidates = result.candidates
+    const rawText = result.rawText
+
+    if (candidates.length === 0) {
+      hideOverlay()
+      $('rawText').textContent = rawText
+      $('rawBox').style.display = 'block'
+      alert(`No string of ≥17 chars found\n\nRaw: ${rawText}\n\nPlease re-choose a clearer photo and retry`)
+      return
+    }
+
+    renderCandidates()
+    $('rawText').textContent = rawText
+    $('rawBox').style.display = 'block'
+    hideOverlay()
+  } catch (e) {
+    hideOverlay()
+    log('❌ OCR failed: ' + e.message)
+    alert('Recognition failed: ' + e.message)
+  }
+}
+
+function renderCandidates() {
+  const html = candidates.map((c, i) => `
+    <div class="cand ${i === 0 ? 'selected' : ''}" data-i="${i}">
+      <div class="sn">${i+1}. ${c.text}</div>
+      <div class="meta">${c.text.length} chars · confidence ${c.confidence}%</div>
+    </div>
+  `).join('')
+  $('candList').innerHTML = html
+  $('candBox').style.display = 'block'
+  selectedIndex = 0
+  $('confirmBtn').disabled = false
+  $('snEdit').value = candidates[0].text
+  updateSnHint()
+  document.querySelectorAll('.cand').forEach(el => {
+    el.onclick = () => {
+      selectedIndex = +el.dataset.i
+      document.querySelectorAll('.cand').forEach(e => e.classList.remove('selected'))
+      el.classList.add('selected')
+      $('snEdit').value = candidates[selectedIndex].text
+      updateSnHint()
+    }
+  })
+}
+
+// Receive messages from uni-app
+window.addEventListener('message', (e) => {
+  log('📥 Message received: ' + JSON.stringify(e.data))
+})
+
+// Long-press the title 3 seconds to show the debug log
+let pressTimer = null
+document.addEventListener('DOMContentLoaded', () => {
+  const header = document.querySelector('h1') || document.querySelector('.short-banner')
+  if (!header) return
+  header.addEventListener('touchstart', () => {
+    pressTimer = setTimeout(() => {
+      $('logBox').style.display = 'block'
+      log('🔍 Debug mode on')
+      log('  window.location.href: ' + window.location.href)
+      log('  document.currentScript: ' + (document.currentScript && document.currentScript.src))
+      log('  typeof plus: ' + typeof plus)
+      if (typeof plus !== 'undefined') {
+        log('  plus.io: ' + (plus.io ? 'available' : 'not available'))
+      }
+    }, 3000)
+  })
+  header.addEventListener('touchend', () => clearTimeout(pressTimer))
+})
+</script>
+</body>
+</html>

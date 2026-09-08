@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SN Matching Test (Plan B: Plaintext)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, sans-serif; padding: 20px; background: #f5f5f7; max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 20px; }
+  .test-case { background: #fff; padding: 12px; border-radius: 8px; margin: 8px 0; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .ok { color: #34c759; }
+  .err { color: #ff3b30; }
+  .warn { color: #ff9500; }
+  .mono { font-family: monospace; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
+  .info { background: #fff8e1; border: 1px solid #ffcc02; padding: 12px; border-radius: 8px; margin: 12px 0; }
+  input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; width: 280px; font-size: 14px; font-family: monospace; }
+  button { padding: 8px 16px; background: #0a84ff; color: #fff; border: 0; border-radius: 6px; cursor: pointer; margin-left: 8px; }
+  .custom-test { background: #fff; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .custom-test h3 { margin: 0 0 8px; }
+  .result-card { margin-top: 12px; padding: 10px; border-radius: 6px; font-size: 14px; }
+  .result-ok { background: #e8f5e9; color: #1b5e20; }
+  .result-warn { background: #fff3e0; color: #e65100; }
+  .result-err { background: #ffebee; color: #b71c1c; }
+</style>
+</head>
+<body>
+<h1>🧪 SN Matching Test (Plan B: read sn-list.txt as plaintext)</h1>
+
+<div class="info" id="info">⏳ Loading...</div>
+
+<div class="custom-test">
+  <h3>Custom Test</h3>
+  <input id="input" placeholder="Enter an SN to test (e.g. NGSBEACBBAJJB2638)">
+  <button onclick="testCustom()">Test</button>
+  <div id="result"></div>
+</div>
+
+<h2>📋 Built-in Test Cases</h2>
+<div id="results"></div>
+
+<script>
+// Browser environment: load sn-list.txt via fetch
+// Compatible paths: try the root first, then /static/
+const CANDIDATE_PATHS = ['/sn-list.txt', './sn-list.txt', '/static/sn-list.txt', './static/sn-list.txt']
+let _list = []
+let _set = null
+
+async function loadList() {
+  let lastErr = null
+  for (const p of CANDIDATE_PATHS) {
+    try {
+      const res = await fetch(p)
+      if (res.ok) {
+        const text = await res.text()
+        const lines = text.split(/\r?\n/)
+        const sns = []
+        for (const line of lines) {
+          const sn = line.trim().toUpperCase()
+          if (!sn || !/^[A-Z0-9]{14,20}$/.test(sn)) continue
+          sns.push(sn)
+        }
+        _list = [...new Set(sns)]
+        _set = new Set(_list)
+        document.getElementById('info').innerHTML =
+          `✅ Loaded: <b>${_list.length}</b> SNs<br>read from <code>${p}</code>`
+        return
+      }
+      lastErr = 'HTTP ' + res.status + ' at ' + p
+    } catch (e) {
+      lastErr = e.message
+    }
+  }
+  document.getElementById('info').innerHTML =
+    `❌ Load failed: ${lastErr}<br>A local server is needed first (see README)`
+}
+
+// OCR confusable characters
+const CONFUSABLE_PAIRS = [
+  ['0', 'O'], ['O', '0'],
+  ['1', 'I'], ['I', '1'], ['1', 'L'], ['L', '1'],
+  ['8', 'B'], ['B', '8'],
+  ['5', 'S'], ['S', '5'],
+  ['2', 'Z'], ['Z', '2'],
+  ['6', 'G'], ['G', '6'],
+  ['9', 'Q'], ['Q', '9'],
+  ['4', 'A'], ['A', '4'],
+  ['U', 'V'], ['V', 'U'],
+  ['6', '8'], ['8', '6'],
+  ['0', '6'], ['6', '0'],
+  ['1', '7'], ['7', '1'],
+  ['C', 'G'], ['G', 'C'],
+  ['N', 'M'], ['M', 'N'],
+  ['D', 'O'], ['O', 'D'],
+  ['H', 'N'], ['N', 'H'],
+  ['I', 'T'], ['T', 'I'],
+  ['F', 'P'], ['P', 'F'],
+  ['R', 'B'], ['B', 'R'],
+]
+
+function genVariants(s, maxDepth = 2) {
+  const variants = new Set([s])
+  let frontier = [s]
+  for (let d = 0; d < maxDepth; d++) {
+    const next = []
+    for (const v of frontier) {
+      for (let i = 0; i < v.length; i++) {
+        for (const [a, b] of CONFUSABLE_PAIRS) {
+          if (v[i] === a) {
+            const nv = v.slice(0, i) + b + v.slice(i + 1)
+            if (!variants.has(nv)) { variants.add(nv); next.push(nv) }
+          }
+        }
+      }
+    }
+    frontier = next
+  }
+  return variants
+}
+
+function matchSn(sn) {
+  const original = String(sn || '').trim().toUpperCase()
+  if (!original) return { matched: false, original, reason: 'empty' }
+  if (!_set) return { matched: false, original, reason: 'no_list' }
+  if (_set.has(original)) return { matched: true, type: 'exact', sn: original, original }
+  for (const v of genVariants(original, 2)) {
+    if (_set.has(v)) {
+      return { matched: true, type: 'variant', sn: v, original, diff: diffChars(original, v) }
+    }
+  }
+  return { matched: false, original, reason: 'not_in_list' }
+}
+
+function diffChars(a, b) {
+  if (a.length !== b.length) return `${a.length} vs ${b.length}`
+  const diffs = []
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) diffs.push(`pos${i}:${a[i]}→${b[i]}`)
+    if (diffs.length >= 3) break
+  }
+  return diffs.join(', ') || 'identical'
+}
+
+// Render test cases
+const testCases = [
+  ['NGSBEACBBAJJB2638', 'Exact match'],
+  ['NG5BEACBBAJJB2638', 'S→5 (position 2)'],
+  ['NGSBEACBBAJJB2G38', '6→G (position 14)'],
+  ['NGSBEACBBAJJ82G38', 'B→8 + 6→G (2 spots)'],
+  ['NGSBEACB8AJJB2638', 'B→8 (position 8)'],
+  ['NG5BEACBBAJJ82638', 'S→5 + 6→8 (2 spots)'],
+  ['XXXXXXXXXXXXXXX8', 'Not in whitelist'],
+  ['AAAAA5AAAAAJB2638', 'First half wrong (large distance)'],
+]
+
+function renderResults() {
+  const html = testCases.map(([sn, desc]) => {
+    const r = matchSn(sn)
+    let cls, icon, label
+    if (r.matched) {
+      cls = r.type === 'exact' ? 'ok' : 'warn'
+      icon = r.type === 'exact' ? '✅' : '⚠️'
+      label = r.type === 'exact' ? 'Exact hit' : 'Tolerant hit'
+    } else {
+      cls = 'err'; icon = '❌'; label = 'No hit'
+    }
+    return `<div class="test-case">
+      <div><b>${desc}</b></div>
+      <div>Input: <span class="mono">${sn}</span></div>
+      <div class="${cls}">${icon} ${label} ${r.type ? '(' + r.type + ')' : ''}</div>
+      ${r.sn ? `<div>Canonical SN: <span class="mono">${r.sn}</span></div>` : ''}
+      ${r.diff ? `<div>Diff: ${r.diff}</div>` : ''}
+    </div>`
+  }).join('')
+  document.getElementById('results').innerHTML = html
+}
+
+window.testCustom = function() {
+  const v = document.getElementById('input').value.trim()
+  if (!v) return
+  const r = matchSn(v)
+  let cls, icon, label
+  if (r.matched) {
+    cls = r.type === 'exact' ? 'result-ok' : 'result-warn'
+    icon = r.type === 'exact' ? '✅' : '⚠️'
+    label = r.type === 'exact' ? 'Exact hit' : 'OCR-tolerant hit'
+  } else {
+    cls = 'result-err'; icon = '❌'; label = 'No hit'
+  }
+  document.getElementById('result').innerHTML =
+    `<div class="result-card ${cls}">
+      <div>${icon} <b>${label}</b> ${r.type ? '(' + r.type + ')' : r.reason || ''}</div>
+      ${r.sn ? `<div>Canonical SN: <span class="mono">${r.sn}</span></div>` : ''}
+      ${r.diff ? `<div>Diff: ${r.diff}</div>` : ''}
+      <div>Original: <span class="mono">${v}</span></div>
+    </div>`
+}
+document.getElementById('input').onkeydown = (e) => { if (e.key === 'Enter') testCustom() }
+
+loadList().then(renderResults)
+</script>
+</body>
+</html>
