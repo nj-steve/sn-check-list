@@ -3179,24 +3179,25 @@ var render = function () {
         attrs: { id: "videoBox", _i: 1 },
       }),
       _c("uni-view", { staticClass: _vm._$g(2, "sc"), attrs: { _i: 2 } }),
-      _c("uni-view", { staticClass: _vm._$g(3, "sc"), attrs: { _i: 3 } }, [
-        _vm._v("Aim at the barcode on the back of the machine"),
+      _c("uni-view", { staticClass: _vm._$g(3, "sc"), attrs: { _i: 3 } }),
+      _c("uni-view", { staticClass: _vm._$g(4, "sc"), attrs: { _i: 4 } }, [
+        _vm._v("Aim at the barcode — fill the frame, hold steady"),
       ]),
-      _vm._$g(4, "i")
+      _vm._$g(5, "i")
         ? _c(
             "uni-view",
-            { staticClass: _vm._$g(4, "sc"), attrs: { _i: 4 } },
+            { staticClass: _vm._$g(5, "sc"), attrs: { _i: 5 } },
             [
               _c(
                 "uni-view",
-                { staticClass: _vm._$g(5, "sc"), attrs: { _i: 5 } },
-                [_vm._v(_vm._$g(5, "t0-0"))]
+                { staticClass: _vm._$g(6, "sc"), attrs: { _i: 6 } },
+                [_vm._v(_vm._$g(6, "t0-0"))]
               ),
               _c(
                 "v-uni-button",
                 {
-                  staticClass: _vm._$g(6, "sc"),
-                  attrs: { _i: 6 },
+                  staticClass: _vm._$g(7, "sc"),
+                  attrs: { _i: 7 },
                   on: {
                     click: function ($event) {
                       return _vm.$handleViewEvent($event)
@@ -3211,13 +3212,13 @@ var render = function () {
         : _vm._e(),
       _c(
         "uni-view",
-        { staticClass: _vm._$g(7, "sc"), attrs: { _i: 7 } },
+        { staticClass: _vm._$g(8, "sc"), attrs: { _i: 8 } },
         [
           _c(
             "v-uni-button",
             {
-              staticClass: _vm._$g(8, "sc"),
-              attrs: { _i: 8 },
+              staticClass: _vm._$g(9, "sc"),
+              attrs: { _i: 9 },
               on: {
                 click: function ($event) {
                   return _vm.$handleViewEvent($event)
@@ -3327,7 +3328,7 @@ if(false) {}
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../../../../../../Applications/HBuilderX.app/Contents/HBuilderX/plugins/uniapp-cli/node_modules/css-loader/dist/runtime/api.js */ 10);
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, "\n.scan-page[data-v-9d531158] {\n\tposition: fixed;\n\tinset: 0;\n\tbackground: #000;\n\tz-index: 999;\n}\n.video-box[data-v-9d531158] {\n\tposition: absolute;\n\tinset: 0;\n\toverflow: hidden;\n}\n.frame[data-v-9d531158] {\n\tposition: absolute;\n\tleft: 50%;\n\ttop: 45%;\n\t-webkit-transform: translate(-50%, -50%);\n\t        transform: translate(-50%, -50%);\n\twidth: 86%;\n\theight: 200px;\n\tborder: 2px solid rgba(255, 255, 255, 0.85);\n\tborder-radius: 12px;\n\tbox-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);\n\tpointer-events: none;\n}\n.hint[data-v-9d531158] {\n\tposition: absolute;\n\ttop: 24px;\n\tleft: 0;\n\tright: 0;\n\ttext-align: center;\n\tcolor: #fff;\n\tfont-size: 14px;\n}\n.actions[data-v-9d531158] {\n\tposition: absolute;\n\tbottom: 40px;\n\tleft: 0;\n\tright: 0;\n\tdisplay: flex;\n\tjustify-content: center;\n}\n.btn-cancel[data-v-9d531158] {\n\tbackground: rgba(255, 255, 255, 0.18);\n\tcolor: #fff;\n\tfont-size: 15px;\n\tborder-radius: 22px;\n\tpadding: 0 32px;\n\theight: 44px;\n\tline-height: 44px;\n}\n.err-box[data-v-9d531158] {\n\tposition: absolute;\n\tleft: 16px;\n\tright: 16px;\n\tbottom: 120px;\n\tbackground: rgba(0, 0, 0, 0.75);\n\tborder-radius: 12px;\n\tpadding: 16px;\n\ttext-align: center;\n}\n.err-text[data-v-9d531158] {\n\tcolor: #ffd60a;\n\tfont-size: 13px;\n\tmargin-bottom: 12px;\n}\n.btn-ocr[data-v-9d531158] {\n\tbackground: #0a84ff;\n\tcolor: #fff;\n\tfont-size: 14px;\n\tborder-radius: 10px;\n\theight: 40px;\n\tline-height: 40px;\n}\n", ""]);
+exports.push([module.i, "\n.scan-page[data-v-9d531158] {\n\tposition: fixed;\n\tinset: 0;\n\tbackground: #000;\n\tz-index: 999;\n}\n.video-box[data-v-9d531158] {\n\tposition: absolute;\n\tinset: 0;\n\toverflow: hidden;\n}\n.frame[data-v-9d531158] {\n\tposition: absolute;\n\tleft: 50%;\n\ttop: 45%;\n\t-webkit-transform: translate(-50%, -50%);\n\t        transform: translate(-50%, -50%);\n\twidth: 86%;\n\theight: 200px;\n\tborder: 2px solid rgba(255, 255, 255, 0.85);\n\tborder-radius: 12px;\n\tbox-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);\n\tpointer-events: none;\n}\n.scanline[data-v-9d531158] {\n\tposition: absolute;\n\tleft: 7%;\n\tright: 7%;\n\ttop: 45%;\n\theight: 2px;\n\tmargin-top: -100px;\n\tbackground: linear-gradient(90deg, transparent, #34c759 20%, #34c759 80%, transparent);\n\tborder-radius: 1px;\n\tbox-shadow: 0 0 8px #34c759;\n\t-webkit-animation: scan-sweep-data-v-9d531158 2s linear infinite;\n\t        animation: scan-sweep-data-v-9d531158 2s linear infinite;\n\tpointer-events: none;\n}\n@-webkit-keyframes scan-sweep-data-v-9d531158 {\n0% { -webkit-transform: translateY(0); transform: translateY(0);\n}\n50% { -webkit-transform: translateY(196px); transform: translateY(196px);\n}\n100% { -webkit-transform: translateY(0); transform: translateY(0);\n}\n}\n@keyframes scan-sweep-data-v-9d531158 {\n0% { -webkit-transform: translateY(0); transform: translateY(0);\n}\n50% { -webkit-transform: translateY(196px); transform: translateY(196px);\n}\n100% { -webkit-transform: translateY(0); transform: translateY(0);\n}\n}\n.hint[data-v-9d531158] {\n\tposition: absolute;\n\ttop: 24px;\n\tleft: 0;\n\tright: 0;\n\ttext-align: center;\n\tcolor: #fff;\n\tfont-size: 14px;\n}\n.actions[data-v-9d531158] {\n\tposition: absolute;\n\tbottom: 40px;\n\tleft: 0;\n\tright: 0;\n\tdisplay: flex;\n\tjustify-content: center;\n}\n.btn-cancel[data-v-9d531158] {\n\tbackground: rgba(255, 255, 255, 0.18);\n\tcolor: #fff;\n\tfont-size: 15px;\n\tborder-radius: 22px;\n\tpadding: 0 32px;\n\theight: 44px;\n\tline-height: 44px;\n}\n.err-box[data-v-9d531158] {\n\tposition: absolute;\n\tleft: 16px;\n\tright: 16px;\n\tbottom: 120px;\n\tbackground: rgba(0, 0, 0, 0.75);\n\tborder-radius: 12px;\n\tpadding: 16px;\n\ttext-align: center;\n}\n.err-text[data-v-9d531158] {\n\tcolor: #ffd60a;\n\tfont-size: 13px;\n\tmargin-bottom: 12px;\n}\n.btn-ocr[data-v-9d531158] {\n\tbackground: #0a84ff;\n\tcolor: #fff;\n\tfont-size: 14px;\n\tborder-radius: 10px;\n\theight: 40px;\n\tline-height: 40px;\n}\n", ""]);
 // Exports
 module.exports = exports;
 
