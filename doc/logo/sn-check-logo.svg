@@ -1,0 +1,37 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- SN Check App logo: scan viewfinder + barcode + verification badge -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B9BFF"/>
+      <stop offset="1" stop-color="#0A5BD6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="0" y="0" width="1024" height="1024" rx="232" fill="url(#bg)"/>
+
+  <!-- Scan viewfinder (four rounded brackets) -->
+  <g stroke="#FFFFFF" stroke-width="46" stroke-linecap="round" fill="none">
+    <path d="M 206 420 L 206 338 Q 206 308 236 308 L 318 308"/>
+    <path d="M 706 308 L 788 308 Q 818 308 818 338 L 818 420"/>
+    <path d="M 206 624 L 206 706 Q 206 736 236 736 L 318 736"/>
+    <path d="M 706 736 L 788 736 Q 818 736 818 706 L 818 624"/>
+  </g>
+
+  <!-- Barcode (Code128-style black-and-white bars) -->
+  <g fill="#FFFFFF">
+    <rect x="262" y="392" width="22" height="260" rx="11"/>
+    <rect x="310" y="392" width="58" height="260" rx="12"/>
+    <rect x="394" y="392" width="22" height="260" rx="11"/>
+    <rect x="442" y="392" width="96" height="260" rx="14"/>
+    <rect x="564" y="392" width="22" height="260" rx="11"/>
+    <rect x="612" y="392" width="58" height="260" rx="12"/>
+    <rect x="696" y="392" width="22" height="260" rx="11"/>
+    <rect x="742" y="392" width="20" height="260" rx="10"/>
+  </g>
+
+  <!-- Verification badge (green + white outline + white check) -->
+  <circle cx="700" cy="696" r="180" fill="#34C759" stroke="#FFFFFF" stroke-width="16"/>
+  <path d="M 622 700 L 680 758 L 786 646" stroke="#FFFFFF" stroke-width="56"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

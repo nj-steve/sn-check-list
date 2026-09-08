@@ -1,0 +1,68 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "SN Check - Removal Inspection",
+				"navigationBarBackgroundColor": "#0a84ff",
+				"navigationBarTextStyle": "white",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/result/result",
+			"style": {
+				"navigationBarTitleText": "Check Result",
+				"navigationBarBackgroundColor": "#0a84ff",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/ocr/ocr",
+			"style": {
+				"navigationBarTitleText": "Image OCR - SN",
+				"navigationBarBackgroundColor": "#0a84ff",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/history/history",
+			"style": {
+				"navigationBarTitleText": "History",
+				"navigationBarBackgroundColor": "#0a84ff",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/sn7/sn7",
+			"style": {
+				"navigationBarTitleText": "SN Last-7 Lookup",
+				"navigationBarBackgroundColor": "#0a84ff",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/scan/scan-h5",
+			"style": {
+				"navigationBarTitleText": "Scan",
+				"navigationBarBackgroundColor": "#000000",
+				"navigationBarTextStyle": "white"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "SN Check",
+		"navigationBarBackgroundColor": "#0a84ff",
+		"backgroundColor": "#f5f5f7"
+	},
+	"condition": {
+		"current": 0,
+		"list": [
+			{
+				"name": "Home",
+				"path": "pages/index/index"
+			}
+		]
+	}
+}
